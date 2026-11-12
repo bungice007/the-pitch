@@ -1,67 +1,577 @@
 <!doctype html>
 <html lang="th">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>THE PITCH — Voice</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>THE PITCH — NPC Edition</title>
+
 <style>
-*{box-sizing:border-box}body{margin:0;background:#101114;color:#fff;font-family:system-ui,"Noto Sans Thai",sans-serif}
-.app{max-width:720px;margin:auto;min-height:100vh;padding:16px;display:flex;flex-direction:column;gap:12px}
-header,.chat{background:#191b20;border:1px solid #30333b;border-radius:18px;padding:16px}h1{margin:0;font-size:24px}
-.sub{color:#aaa;font-size:13px;margin-top:5px}.stats{display:flex;justify-content:space-between;margin-top:14px;padding:10px;background:#111216;border-radius:12px}
-.chat{flex:1;min-height:430px;overflow:auto}.msg{max-width:82%;padding:11px 14px;border-radius:16px;margin:8px 0;line-height:1.5}
-.npc{background:#292c34}.you{background:#eee;color:#111;margin-left:auto}.name{font-size:11px;opacity:.65;margin-bottom:3px}
-.controls{display:flex;gap:8px}input{flex:1;padding:14px;border-radius:14px;border:1px solid #3a3d47;background:#202228;color:#fff;font-size:16px}
-button{border:0;border-radius:14px;padding:0 17px;font-weight:800;cursor:pointer}.mic{min-width:64px;font-size:22px}
-.recording{background:#d94b4b;color:#fff}.notice{text-align:center;padding:10px;border-radius:12px}.win{background:#21442e}.lose{background:#552a2a}
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #101114;
+  color: white;
+  font-family: system-ui, "Noto Sans Thai", sans-serif;
+}
+
+.app {
+  max-width: 720px;
+  margin: auto;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+/* ===== HEADER ===== */
+
+header {
+  background: #191b20;
+  border: 1px solid #30333b;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.sub {
+  color: #aaa;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* ===== NPC SELECT ===== */
+
+.npc-title {
+  margin: 18px 0 10px;
+  font-size: 18px;
+}
+
+.npc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.npc-card {
+  background: #191b20;
+  border: 2px solid #30333b;
+  border-radius: 16px;
+  padding: 12px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.npc-card:hover {
+  transform: translateY(-2px);
+  border-color: #777;
+}
+
+.npc-card.selected {
+  border-color: #f0b429;
+  box-shadow: 0 0 16px rgba(240,180,41,.25);
+}
+
+.npc-avatar {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 12px;
+  background: #292c34;
+}
+
+.npc-name {
+  font-size: 17px;
+  font-weight: 800;
+  margin-top: 8px;
+}
+
+.npc-role {
+  color: #f0b429;
+  font-size: 12px;
+}
+
+.npc-desc {
+  color: #aaa;
+  font-size: 12px;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+.npc-difficulty {
+  margin-top: 7px;
+  font-size: 13px;
+  color: #ffd166;
+}
+
+/* ===== GAME ===== */
+
+.game {
+  display: none;
+}
+
+.game.active {
+  display: block;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding: 10px;
+  background: #111216;
+  border-radius: 12px;
+}
+
+.chat {
+  background: #191b20;
+  border: 1px solid #30333b;
+  border-radius: 18px;
+  padding: 16px;
+  min-height: 430px;
+  max-height: 60vh;
+  overflow: auto;
+  margin: 14px 0;
+}
+
+.msg {
+  max-width: 84%;
+  padding: 11px 14px;
+  border-radius: 16px;
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.npc {
+  background: #292c34;
+}
+
+.you {
+  background: #eee;
+  color: #111;
+  margin-left: auto;
+}
+
+.name {
+  font-size: 11px;
+  opacity: .65;
+  margin-bottom: 3px;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+}
+
+input {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #3a3d47;
+  background: #202228;
+  color: white;
+  font-size: 16px;
+}
+
+button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 17px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary {
+  background: #f0b429;
+  color: #111;
+}
+
+.back {
+  margin-top: 12px;
+  background: #292c34;
+  color: white;
+}
+
+.notice {
+  text-align: center;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.win { background: #21442e; }
+.lose { background: #552a2a; }
+
 </style>
 </head>
-<body><div class="app">
-<header><h1>🎭 THE PITCH <span style="font-size:13px;color:#aaa">VOICE BETA</span></h1>
-<div class="sub">🎙️ กดไมค์เพื่อพูด → AI ฟัง → NPC ตอบกลับด้วยเสียง AI</div>
-<div class="stats"><span>🎯 เป้าหมาย 50,000 เครดิต</span><strong id="credits">0</strong></div></header>
-<div id="chat" class="chat"><div class="msg npc"><div class="name">คุณนนท์</div><div>สวัสดีครับ คุณอยากคุยเรื่องอะไรกับผม?</div></div></div>
-<div class="controls"><button id="mic" class="mic" title="กดเพื่อเริ่ม/หยุดพูด">🎙️</button><input id="input" placeholder="หรือพิมพ์ข้อความ..." maxlength="1000"><button id="send">ส่ง</button></div>
-<div id="notice"></div>
+
+<body>
+
+<div class="app">
+
+<header>
+  <h1>🎭 THE PITCH</h1>
+  <div class="sub">
+    เลือกคู่เจรจาของคุณ ใช้ไหวพริบ และสะสมเครดิตให้ถึง 50,000
+  </div>
+</header>
+
+<!-- NPC SELECT -->
+
+<div id="selection">
+
+<h2 class="npc-title">เลือก NPC ที่คุณต้องการเจรจา</h2>
+
+<div class="npc-grid" id="npcGrid"></div>
+
 </div>
+
+
+<!-- GAME -->
+
+<div class="game" id="game">
+
+<header>
+  <strong id="currentNpc"></strong>
+  <div class="stats">
+    <span>🎯 เป้าหมาย 50,000 เครดิต</span>
+    <strong id="credits">0 เครดิต</strong>
+  </div>
+</header>
+
+<div id="chat" class="chat"></div>
+
+<div class="controls">
+  <input id="input"
+    placeholder="พิมพ์ข้อความเพื่อเจรจา..."
+    maxlength="1000">
+
+  <button id="send" class="primary">ส่ง</button>
+</div>
+
+<div id="notice"></div>
+
+<button class="back" id="back">← เปลี่ยน NPC</button>
+
+</div>
+
+</div>
+
+
 <script>
-const chat=document.querySelector("#chat"), input=document.querySelector("#input"), send=document.querySelector("#send"), mic=document.querySelector("#mic"), creditsEl=document.querySelector("#credits"), notice=document.querySelector("#notice");
-let credits=0, history=[], ended=false, recorder=null, chunks=[], busy=false;
 
-function add(text,who){const x=document.createElement("div");x.className="msg "+who;x.innerHTML=`<div class="name">${who==="you"?"คุณ":"คุณนนท์"}</div><div></div>`;x.lastChild.textContent=text;chat.appendChild(x);chat.scrollTop=chat.scrollHeight}
-async function speak(text){
- try{const r=await fetch("/api/speech",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text})});if(!r.ok)return;const blob=await r.blob();const url=URL.createObjectURL(blob);const audio=new Audio(url);audio.play();audio.onended=()=>URL.revokeObjectURL(url)}catch(e){console.warn(e)}
-}
-async function talk(message){
- if(!message||ended||busy)return;busy=true;add(message,"you");history.push({role:"user",content:message});input.value="";send.disabled=true;mic.disabled=true;
- try{
-  const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message,history,credits})});
-  const d=await r.json();if(d.error)throw Error(d.error);
-  add(d.reply,"npc");history.push({role:"assistant",content:d.reply});credits=d.credits??credits;creditsEl.textContent=credits.toLocaleString()+" เครดิต";
-  speak(d.reply);
-  if(d.win){ended=true;notice.className="notice win";notice.textContent="🏆 MISSION COMPLETE! ถึงเป้าหมายแล้ว"}
-  if(d.game_over){ended=true;notice.className="notice lose";notice.textContent="💀 GAME OVER — การเจรจาจบลงแล้ว"}
- }catch(e){add("ระบบขัดข้อง: "+e.message,"npc")}
- busy=false;send.disabled=false;mic.disabled=false;
-}
-send.onclick=()=>talk(input.value.trim());input.addEventListener("keydown",e=>{if(e.key==="Enter")talk(input.value.trim())});
+/* =========================
+   NPC DATABASE
+========================= */
 
-mic.onclick=async()=>{
- if(ended||busy)return;
- if(!recorder){
-  try{
-   const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-   recorder=new MediaRecorder(stream);chunks=[];
-   recorder.ondataavailable=e=>chunks.push(e.data);
-   recorder.onstop=async()=>{
-    mic.classList.remove("recording");mic.textContent="🎙️";
-    const blob=new Blob(chunks,{type:recorder.mimeType});
-    const fd=new FormData();fd.append("audio",blob,"voice.webm");
-    try{const r=await fetch("/api/transcribe",{method:"POST",body:fd});const d=await r.json();if(d.text){input.value=d.text;talk(d.text)}else throw Error(d.error||"ไม่ได้ยินเสียง")}
-    catch(e){add("🎙️ "+e.message,"npc")}
-    stream.getTracks().forEach(t=>t.stop());recorder=null;
-   };
-   recorder.start();mic.classList.add("recording");mic.textContent="⏹️";
-  }catch(e){alert("กรุณาอนุญาตให้เว็บไซต์ใช้ไมโครโฟน")}
- }else recorder.stop();
+const NPCS = [
+
+{
+id:"non",
+name:"คุณนนท์",
+role:"เจ้าของร้านกาแฟ",
+desc:"สุภาพ ระวังตัว ชอบเหตุผลชัดเจน",
+difficulty:"⭐⭐☆☆☆",
+avatar:"https://i.pravatar.cc/400?img=12",
+greeting:"สวัสดีครับ คุณอยากคุยเรื่องอะไรกับผม?"
+},
+
+{
+id:"win",
+name:"พี่วิน",
+role:"นักลงทุนสายเสี่ยง",
+desc:"พูดตรง ชอบทดสอบคน ถ้าแน่จริงเขาจะให้โอกาส",
+difficulty:"⭐⭐⭐⭐☆",
+avatar:"https://i.pravatar.cc/400?img=13",
+greeting:"มีอะไรน่าสนใจพอจะทำให้ผมเสียเวลาฟังหรือเปล่า?"
+},
+
+{
+id:"ton",
+name:"ต้น",
+role:"เจ้าของธุรกิจรุ่นใหม่",
+desc:"เป็นกันเอง แต่เจรจายาก ต้องหาจุดร่วมให้เจอ",
+difficulty:"⭐⭐⭐☆☆",
+avatar:"https://i.pravatar.cc/400?img=14",
+greeting:"หวัดดีครับ! มีไอเดียอะไรมาเสนอผมล่ะ?"
+},
+
+{
+id:"min",
+name:"คุณมิน",
+role:"นักธุรกิจหญิง",
+desc:"สุขุม ละเอียด ชอบคนมีแผนและข้อมูลน่าเชื่อถือ",
+difficulty:"⭐⭐⭐⭐☆",
+avatar:"https://i.pravatar.cc/400?img=47",
+greeting:"สวัสดีค่ะ ก่อนเริ่ม คุณเตรียมข้อมูลมาพร้อมแค่ไหนคะ?"
+},
+
+{
+id:"praew",
+name:"แพรว",
+role:"เจ้าของแบรนด์วัยรุ่น",
+desc:"ฉลาด ทันคน พูดตรง ถ้าไอเดียดีเธอจะสนใจ",
+difficulty:"⭐⭐⭐☆☆",
+avatar:"https://i.pravatar.cc/400?img=45",
+greeting:"โอเคค่ะ เล่ามาสิว่าไอเดียของคุณมันน่าสนใจยังไง?"
+},
+
+{
+id:"ann",
+name:"พี่แอน",
+role:"ผู้จัดการร้าน",
+desc:"ใจดี แต่จับพิรุธเก่ง ถ้าพูดไม่ดีอาจพลาดได้",
+difficulty:"⭐⭐☆☆☆",
+avatar:"https://i.pravatar.cc/400?img=49",
+greeting:"สวัสดีจ้ะ ไม่ต้องรีบนะ ค่อย ๆ เล่าให้พี่ฟังก็ได้"
+}
+
+];
+
+
+/* =========================
+   VARIABLES
+========================= */
+
+const selection = document.querySelector("#selection");
+const game = document.querySelector("#game");
+const npcGrid = document.querySelector("#npcGrid");
+
+const chat = document.querySelector("#chat");
+const input = document.querySelector("#input");
+const send = document.querySelector("#send");
+
+const creditsEl = document.querySelector("#credits");
+const currentNpcEl = document.querySelector("#currentNpc");
+const notice = document.querySelector("#notice");
+
+let selectedNPC = null;
+let credits = 0;
+let history = [];
+let ended = false;
+let busy = false;
+
+
+/* =========================
+   RENDER NPC CARDS
+========================= */
+
+NPCS.forEach(npc => {
+
+const card = document.createElement("div");
+
+card.className = "npc-card";
+
+card.innerHTML = `
+<img class="npc-avatar" src="${npc.avatar}">
+<div class="npc-name">${npc.name}</div>
+<div class="npc-role">${npc.role}</div>
+<div class="npc-desc">${npc.desc}</div>
+<div class="npc-difficulty">${npc.difficulty}</div>
+`;
+
+card.onclick = () => startGame(npc);
+
+npcGrid.appendChild(card);
+
+});
+
+
+/* =========================
+   START GAME
+========================= */
+
+function startGame(npc) {
+
+selectedNPC = npc;
+
+credits = 0;
+history = [];
+ended = false;
+notice.textContent = "";
+
+selection.style.display = "none";
+game.classList.add("active");
+
+currentNpcEl.textContent =
+`${npc.name} — ${npc.role}`;
+
+chat.innerHTML = "";
+
+add(npc.greeting,"npc");
+
+}
+
+
+/* =========================
+   ADD MESSAGE
+========================= */
+
+function add(text, who) {
+
+const x = document.createElement("div");
+
+x.className = "msg " + who;
+
+x.innerHTML = `
+<div class="name">
+${who === "you" ? "คุณ" : selectedNPC.name}
+</div>
+<div></div>
+`;
+
+x.lastElementChild.textContent = text;
+
+chat.appendChild(x);
+
+chat.scrollTop = chat.scrollHeight;
+
+}
+
+
+/* =========================
+   TALK TO AI
+========================= */
+
+async function talk(message) {
+
+if (!message || ended || busy) return;
+
+busy = true;
+
+add(message,"you");
+
+history.push({
+role:"user",
+content:message
+});
+
+input.value = "";
+
+send.disabled = true;
+
+try {
+
+const r = await fetch("/api/chat", {
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+message,
+
+history,
+
+credits,
+
+npc:selectedNPC.id
+
+})
+
+});
+
+const d = await r.json();
+
+if (d.error)
+throw Error(d.error);
+
+add(d.reply,"npc");
+
+history.push({
+role:"assistant",
+content:d.reply
+});
+
+credits = d.credits ?? credits;
+
+creditsEl.textContent =
+credits.toLocaleString() + " เครดิต";
+
+if (d.win) {
+
+ended = true;
+
+notice.className =
+"notice win";
+
+notice.textContent =
+"🏆 MISSION COMPLETE! ถึงเป้าหมายแล้ว";
+
+}
+
+if (d.game_over) {
+
+ended = true;
+
+notice.className =
+"notice lose";
+
+notice.textContent =
+"💀 GAME OVER — การเจรจาจบลงแล้ว";
+
+}
+
+}
+
+catch(e) {
+
+add(
+"ระบบขัดข้อง: " +
+e.message,
+"npc"
+);
+
+}
+
+busy = false;
+
+send.disabled = false;
+
+}
+
+
+/* =========================
+   CONTROLS
+========================= */
+
+send.onclick =
+() => talk(input.value.trim());
+
+input.addEventListener(
+"keydown",
+e => {
+
+if (e.key === "Enter")
+talk(input.value.trim());
+
+}
+);
+
+
+/* =========================
+   BACK
+========================= */
+
+document
+.querySelector("#back")
+.onclick = () => {
+
+game.classList.remove("active");
+
+selection.style.display = "block";
+
+selectedNPC = null;
+
 };
-</script></body></html>
+
+</script>
+
+</body>
+</html>
