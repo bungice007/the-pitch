@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>THE PITCH — Voice</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101114;color:#fff;font-family:system-ui,"Noto Sans Thai",sans-serif}
+.app{max-width:720px;margin:auto;min-height:100vh;padding:16px;display:flex;flex-direction:column;gap:12px}
+header,.chat{background:#191b20;border:1px solid #30333b;border-radius:18px;padding:16px}h1{margin:0;font-size:24px}
+.sub{color:#aaa;font-size:13px;margin-top:5px}.stats{display:flex;justify-content:space-between;margin-top:14px;padding:10px;background:#111216;border-radius:12px}
+.chat{flex:1;min-height:430px;overflow:auto}.msg{max-width:82%;padding:11px 14px;border-radius:16px;margin:8px 0;line-height:1.5}
+.npc{background:#292c34}.you{background:#eee;color:#111;margin-left:auto}.name{font-size:11px;opacity:.65;margin-bottom:3px}
+.controls{display:flex;gap:8px}input{flex:1;padding:14px;border-radius:14px;border:1px solid #3a3d47;background:#202228;color:#fff;font-size:16px}
+button{border:0;border-radius:14px;padding:0 17px;font-weight:800;cursor:pointer}.mic{min-width:64px;font-size:22px}
+.recording{background:#d94b4b;color:#fff}.notice{text-align:center;padding:10px;border-radius:12px}.win{background:#21442e}.lose{background:#552a2a}
+</style>
+</head>
+<body><div class="app">
+<header><h1>🎭 THE PITCH <span style="font-size:13px;color:#aaa">VOICE BETA</span></h1>
+<div class="sub">🎙️ กดไมค์เพื่อพูด → AI ฟัง → NPC ตอบกลับด้วยเสียง AI</div>
+<div class="stats"><span>🎯 เป้าหมาย 50,000 เครดิต</span><strong id="credits">0</strong></div></header>
+<div id="chat" class="chat"><div class="msg npc"><div class="name">คุณนนท์</div><div>สวัสดีครับ คุณอยากคุยเรื่องอะไรกับผม?</div></div></div>
+<div class="controls"><button id="mic" class="mic" title="กดเพื่อเริ่ม/หยุดพูด">🎙️</button><input id="input" placeholder="หรือพิมพ์ข้อความ..." maxlength="1000"><button id="send">ส่ง</button></div>
+<div id="notice"></div>
+</div>
+<script>
+const chat=document.querySelector("#chat"), input=document.querySelector("#input"), send=document.querySelector("#send"), mic=document.querySelector("#mic"), creditsEl=document.querySelector("#credits"), notice=document.querySelector("#notice");
+let credits=0, history=[], ended=false, recorder=null, chunks=[], busy=false;
+
+function add(text,who){const x=document.createElement("div");x.className="msg "+who;x.innerHTML=`<div class="name">${who==="you"?"คุณ":"คุณนนท์"}</div><div></div>`;x.lastChild.textContent=text;chat.appendChild(x);chat.scrollTop=chat.scrollHeight}
+async function speak(text){
+ try{const r=await fetch("/api/speech",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text})});if(!r.ok)return;const blob=await r.blob();const url=URL.createObjectURL(blob);const audio=new Audio(url);audio.play();audio.onended=()=>URL.revokeObjectURL(url)}catch(e){console.warn(e)}
+}
+async function talk(message){
+ if(!message||ended||busy)return;busy=true;add(message,"you");history.push({role:"user",content:message});input.value="";send.disabled=true;mic.disabled=true;
+ try{
+  const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message,history,credits})});
+  const d=await r.json();if(d.error)throw Error(d.error);
+  add(d.reply,"npc");history.push({role:"assistant",content:d.reply});credits=d.credits??credits;creditsEl.textContent=credits.toLocaleString()+" เครดิต";
+  speak(d.reply);
+  if(d.win){ended=true;notice.className="notice win";notice.textContent="🏆 MISSION COMPLETE! ถึงเป้าหมายแล้ว"}
+  if(d.game_over){ended=true;notice.className="notice lose";notice.textContent="💀 GAME OVER — การเจรจาจบลงแล้ว"}
+ }catch(e){add("ระบบขัดข้อง: "+e.message,"npc")}
+ busy=false;send.disabled=false;mic.disabled=false;
+}
+send.onclick=()=>talk(input.value.trim());input.addEventListener("keydown",e=>{if(e.key==="Enter")talk(input.value.trim())});
+
+mic.onclick=async()=>{
+ if(ended||busy)return;
+ if(!recorder){
+  try{
+   const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+   recorder=new MediaRecorder(stream);chunks=[];
+   recorder.ondataavailable=e=>chunks.push(e.data);
+   recorder.onstop=async()=>{
+    mic.classList.remove("recording");mic.textContent="🎙️";
+    const blob=new Blob(chunks,{type:recorder.mimeType});
+    const fd=new FormData();fd.append("audio",blob,"voice.webm");
+    try{const r=await fetch("/api/transcribe",{method:"POST",body:fd});const d=await r.json();if(d.text){input.value=d.text;talk(d.text)}else throw Error(d.error||"ไม่ได้ยินเสียง")}
+    catch(e){add("🎙️ "+e.message,"npc")}
+    stream.getTracks().forEach(t=>t.stop());recorder=null;
+   };
+   recorder.start();mic.classList.add("recording");mic.textContent="⏹️";
+  }catch(e){alert("กรุณาอนุญาตให้เว็บไซต์ใช้ไมโครโฟน")}
+ }else recorder.stop();
+};
+</script></body></html>
